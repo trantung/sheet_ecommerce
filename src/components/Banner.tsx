@@ -34,15 +34,17 @@ export default function Banner() {
 
   if (loading) {
     return (
-      <section className="relative h-96 bg-gradient-to-r from-slate-400 to-slate-500 overflow-hidden animate-pulse">
+      <div className="block card w-full relative h-80 lg:h-100 bg-gradient-to-r from-slate-400 to-slate-500 overflow-hidden animate-pulse">
         <div className="absolute inset-0 bg-gray-300"></div>
-        <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center text-center">
-          <div className="space-y-4 w-full max-w-2xl">
-            <div className="h-12 bg-gray-200 rounded w-3/4 mx-auto"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
+        <div className="block main-hero px-4 h-80 lg:h-100 absolute inset-0 flex w-full">
+          <div className="block w-full max-w-7xl mx-auto flex items-center">
+            <div className="space-y-4 w-full max-w-2xl">
+              <div className="h-12 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     )
   }
 
@@ -57,27 +59,32 @@ export default function Banner() {
   const smallHero = siteData?.configs?.small_hero === 1
 
   // const heroHeight = smallHero ? "h-64" : "h-96"
-  const heroHeight = "h-96"
+  const heroHeight = smallHero ? "h-80" : "h-80 lg:h-100"
 
   return (
-    <section className={`relative ${heroHeight} bg-gradient-to-r from-slate-400 to-slate-500 overflow-hidden`}>
-      {backgroundHero && (
-        <div className="absolute inset-0">
+    <div className="block card w-full relative">
+      <div className="block relative h-80 lg:h-100">
+        {backgroundHero ? (
           <Image
             src={backgroundHero}
             alt="Hero background"
             fill
-            className="object-cover opacity-80"
+            className="object-cover object-center"
             priority
           />
-        </div>
-      )}
-      <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center text-center">
-        <div className="text-white">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{titlePage}</h1>
-          <p className="text-lg opacity-90">{subtitlePage}</p>
+        ) : (
+          <div className="h-80 lg:h-100 w-full bg-gradient-to-r from-slate-400 to-slate-500"></div>
+        )}
+      </div>
+      <div className="absolute inset-0 bg-black opacity-20"></div>
+      <div className={`block main-hero px-4 ${heroHeight} absolute inset-0 flex w-full`}>
+        <div className="block w-full max-w-7xl mx-auto flex items-center">
+          <div className="block max-w-2xl text-white">
+            <h1 className="lg:text-5xl font-bold block text-2xl">{titlePage}</h1>
+            <h2 className="text-lg block mt-4">{subtitlePage}</h2>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

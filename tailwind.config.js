@@ -20,6 +20,9 @@ module.exports = {
       },
     },
     extend: {
+      height: {
+        "160": "40rem", // 640px
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -53,6 +56,9 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        navy: {
+          450: "#465675",
         },
       },
       borderRadius: {

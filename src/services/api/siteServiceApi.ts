@@ -90,6 +90,35 @@ export interface ApiResponse {
     data: SiteData;
 }
 
+export interface ProductItem {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string;
+    thumbnail: string;
+    author: string;
+    content: string;
+    published_date: string;
+    status: string;
+    price?: string;
+    old_price?: string;
+    best_selling?: number;
+    new_arrival?: number;
+    inventory?: number;
+    size?: string;
+    color?: string;
+    material?: string;
+    rating?: string;
+    images?: string; // JSON string array
+    category_relate: CategoryRelate[];
+}
+
+export interface ProductDetailResponse {
+    detail: ProductItem[];
+    product_relate: ProductItem[];
+    site_informations?: SiteInformation[];
+}
+
 class SiteServiceApi {
     private baseUrl: string;
 
@@ -190,6 +219,33 @@ class SiteServiceApi {
 
     async getSiteData(): Promise<ApiResponse> {
         return this.post("/site/index");
+    }
+
+    async getProductDetail(slug: string): Promise<ProductDetailResponse> {
+        try {
+            const response = await fetch(`${this.baseUrl}/product/detail`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ slug })
+            })
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+
+            const result = await response.json()
+
+            if (!result.status || !result.data) {
+                return { detail: [], product_relate: [] } // Return empty arrays if no data found
+            }
+
+            return result.data as ProductDetailResponse
+        } catch (error) {
+            console.error("Failed to fetch product detail:", error)
+            throw error
+        }
     }
 }
 

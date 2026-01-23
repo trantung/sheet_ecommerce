@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 
 interface Product {
   id: string
@@ -18,40 +17,46 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
-    <Link href={`/products/${product.slug}`}>
-      <div
-        className={`group cursor-pointer transition-transform hover:scale-105 border border-gray-200 rounded-lg p-4 bg-white ${
-          isHovered ? "shadow-lg" : "shadow-sm"
-        }`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3 relative">
+    <div className="block rounded-lg text-base" id={product.slug}>
+      <Link href={`/products/${product.slug}`} className="block border rounded-lg dark:border-navy-450 overflow-hidden">
+        <div className="block block-image">
           {product.image ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+            <div className="relative w-full aspect-square lg:aspect-auto lg:h-80 lg:w-80 overflow-hidden">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover object-center rounded-t-lg"
+                sizes="(max-width: 1024px) 100vw, 320px"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.setAttribute("data-error", "1")
+                }}
+              />
+            </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <div className="w-full aspect-square lg:aspect-auto lg:h-80 lg:w-80 bg-gray-100 rounded-t-lg flex items-center justify-center text-gray-400">
               No Image
             </div>
           )}
         </div>
-        <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-green-600 font-semibold">${product.price.toFixed(2)}</span>
-          {product.originalPrice && (
-            <span className="text-gray-400 line-through text-sm">${product.originalPrice.toFixed(2)}</span>
-          )}
+        <div className="block p-4">
+          <span className="block font-semibold line-clamp-2">{product.name}</span>
+          <div className="block mt-2">
+            <div className="block mt-1 flex space-x-2 items-center">
+              <span className="block font-semibold" style={{ color: "#16a34a" }}>
+                ${product.price.toFixed(2)}
+              </span>
+              {product.originalPrice && (
+                <span className="block text-slate-400 dark:text-navy-300 line-through">
+                  ${product.originalPrice.toFixed(2)}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   )
 }

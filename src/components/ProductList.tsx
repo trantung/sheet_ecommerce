@@ -12,19 +12,26 @@ interface Product {
 interface ProductListProps {
   products: Product[]
   title: string
+  variant?: "new-arrival" | "best-selling"
 }
 
-export default function ProductList({ products, title }: ProductListProps) {
+export default function ProductList({ products, title, variant = "new-arrival" }: ProductListProps) {
+  const blockClass = variant === "best-selling" ? "block block-best-selling mt-20 px-4" : "block block-new-arrival mt-20 px-4"
+  
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-8">{title}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+    <div className={blockClass}>
+      <div className="block mx-auto w-full max-w-7xl">
+        <div className="block-title">
+          <span className="text-2xl font-bold">{title}</span>
+        </div>
+        <div className="block block-products mt-10">
+          <div className="block grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
