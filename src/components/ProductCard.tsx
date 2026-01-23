@@ -29,14 +29,20 @@ export default function ProductCard({ product }: ProductCardProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
-          <Image
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
-            width={300}
-            height={300}
-            className="w-full h-full object-cover"
-          />
+        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3 relative">
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
         </div>
         <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
         <div className="flex items-center gap-2">

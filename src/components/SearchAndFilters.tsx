@@ -5,13 +5,19 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+interface Category {
+  category_id: number
+  category_name: string
+}
+
 interface SearchAndFiltersProps {
   onSearchChange: (search: string) => void
   onCategoryChange: (category: string) => void
   onSortChange: (sort: string) => void
+  categories?: Category[]
 }
 
-export default function SearchAndFilters({ onSearchChange, onCategoryChange, onSortChange }: SearchAndFiltersProps) {
+export default function SearchAndFilters({ onSearchChange, onCategoryChange, onSortChange, categories = [] }: SearchAndFiltersProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   const handleSearchChange = (value: string) => {
@@ -36,9 +42,11 @@ export default function SearchAndFilters({ onSearchChange, onCategoryChange, onS
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All categories</SelectItem>
-          <SelectItem value="flowering">Flowering plants</SelectItem>
-          <SelectItem value="herbs">Herbs</SelectItem>
-          <SelectItem value="succulents">Succulents</SelectItem>
+          {categories.map((category) => (
+            <SelectItem key={category.category_id} value={category.category_name}>
+              {category.category_name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Select defaultValue="featured" onValueChange={onSortChange}>
