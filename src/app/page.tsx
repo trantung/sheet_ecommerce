@@ -8,7 +8,7 @@ import ProductList from "@/components/ProductList"
 import SearchAndFilters from "@/components/SearchAndFilters"
 import ProductCard from "@/components/ProductCard"
 // import FloatingShoppingBag from "@/components/FloatingShoppingBag"
-import { siteServiceApi, type SiteData, type Product as ApiProduct } from "@/services/api/siteServiceApi"
+import { siteServiceApi, type SiteData, type Product as ApiProduct, type ProductItem } from "@/services/api/siteServiceApi"
 import { useSiteData } from "@/contexts/SiteDataContext"
 
 interface Product {
@@ -21,7 +21,7 @@ interface Product {
 }
 
 // Helper function to transform API product to component product format
-const transformProduct = (apiProduct: ApiProduct): Product => {
+const transformProduct = (apiProduct: ApiProduct | ProductItem): Product => {
   // Use price from API, fallback to 0 if not provided
   const price = apiProduct.price ? parseFloat(apiProduct.price) : 0
   const originalPrice = apiProduct.old_price ? parseFloat(apiProduct.old_price) : undefined
@@ -98,11 +98,16 @@ const getBestSelling = (siteData: SiteData | null): Product[] => {
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortBy, setSortBy] = useState("featured")
+  const [sortBy, setSortBy] = useState("")
   const [email, setEmail] = useState("")
+  const [apiProducts, setApiProducts] = useState<Product[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const [subscriptionStatus, setSubscriptionStatus] = useState<"idle" | "success" | "error">("idle")
 
   const { siteData, loading } = useSiteData()
+
+  // Config flags
+  const showNewsletter = siteData?.configs?.collect_email === 1
 
   const getSiteInfo = (code: string) => {
     return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)
@@ -120,6 +125,27 @@ export default function Home() {
     return getAllProductsFromCategories(siteData)
   }, [siteData])
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsSearching(true)
+      try {
+        const categoryId = selectedCategory === "all" ? undefined : selectedCategory
+        const results = await siteServiceApi.searchProducts(searchTerm, categoryId, sortBy)
+        setApiProducts(results.map(transformProduct))
+      } catch (error) {
+        console.error("Failed to fetch products:", error)
+      } finally {
+        setIsSearching(false)
+      }
+    }
+
+    const timer = setTimeout(() => {
+      fetchProducts()
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm, selectedCategory, sortBy])
+
   // Get newArrivals and bestSelling based on flags from API
   const newArrivals = useMemo(() => {
     return getNewArrivals(siteData)
@@ -128,42 +154,6 @@ export default function Home() {
   const bestSelling = useMemo(() => {
     return getBestSelling(siteData)
   }, [siteData])
-
-  const filteredProducts = useMemo(() => {
-    let filtered = [...allProducts]
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    }
-
-    // Filter by category
-    if (selectedCategory !== "all" && siteData?.categories) {
-      const category = siteData.categories.find((cat) => cat.category_name.toLowerCase() === selectedCategory.toLowerCase())
-      if (category) {
-        const categoryProductSlugs = new Set(category.products.map((p) => p.slug))
-        filtered = filtered.filter((product) => categoryProductSlugs.has(product.slug))
-      }
-    }
-
-    // Sort products
-    switch (sortBy) {
-      case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
-      case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
-      case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name))
-        break
-      default:
-        // Keep original order for featured
-        break
-    }
-
-    return filtered
-  }, [searchTerm, selectedCategory, sortBy, allProducts, siteData])
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -288,22 +278,24 @@ export default function Home() {
         </div>
 
         {/* Newsletter Section Skeleton */}
-        <div className="block block-sub-email mt-20 px-4 bg-slate-100 dark:bg-navy-800">
-          <div className="block mx-auto max-w-screen-lg items-center text-center">
-            <div className="block block-email-text max-w-2xl py-10 mx-auto">
-              <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-4 animate-pulse"></div>
-              <div className="h-6 bg-gray-300 rounded w-96 mx-auto mb-8 animate-pulse"></div>
-              <div className="block grid grid-cols-12 items-center justify-center gap-4">
-                <div className="block col-span-12 lg:col-span-7">
-                  <div className="h-12 bg-gray-300 rounded animate-pulse"></div>
-                </div>
-                <div className="block col-span-12 lg:col-span-5">
-                  <div className="h-12 bg-gray-300 rounded animate-pulse"></div>
+        {showNewsletter && (
+          <div className="block block-sub-email mt-20 px-4 bg-slate-100 dark:bg-navy-800">
+            <div className="block mx-auto max-w-screen-lg items-center text-center">
+              <div className="block block-email-text max-w-2xl py-10 mx-auto">
+                <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+                <div className="h-6 bg-gray-300 rounded w-96 mx-auto mb-8 animate-pulse"></div>
+                <div className="block grid grid-cols-12 items-center justify-center gap-4">
+                  <div className="block col-span-12 lg:col-span-7">
+                    <div className="h-12 bg-gray-300 rounded animate-pulse"></div>
+                  </div>
+                  <div className="block col-span-12 lg:col-span-5">
+                    <div className="h-12 bg-gray-300 rounded animate-pulse"></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     )
   }
@@ -314,12 +306,16 @@ export default function Home() {
       {newArrivals.length > 0 && <ProductList products={newArrivals} title={newArrivalsTitle} variant="new-arrival" />}
       {bestSelling.length > 0 && <ProductList products={bestSelling} title={bestSellingTitle} variant="best-selling" />}
 
-      <div className="block block-main-content mt-20 px-4">
+      <div className="block block-main-content mt-20 px-4 pb-10">
         <div className="block mx-auto w-full max-w-7xl">
           <div className="block-title flex justify-between mx-auto items-center">
             <span className="text-2xl font-bold">{allProductsTitle}</span>
             <span className="text-xs+ text-slate-500 dark:text-navy-300">
-              Show {filteredProducts.length > 0 ? 1 : 0}-{filteredProducts.length} of {allProducts.length} products
+              {isSearching ? (
+                "Searching..."
+              ) : (
+                `Show ${apiProducts.length > 0 ? 1 : 0}-${apiProducts.length} of ${allProducts.length} products`
+              )}
             </span>
           </div>
           <SearchAndFilters
@@ -331,7 +327,7 @@ export default function Home() {
           <div className="block block-all-products mt-10">
             <div className="block block-products">
               <div className="block grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredProducts.map((product) => (
+                {apiProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -341,60 +337,62 @@ export default function Home() {
       </div>
 
       {/* Newsletter Section */}
-      <div className="block block-sub-email mt-20 px-4 bg-slate-100 dark:bg-navy-800">
-        <div className="block mx-auto max-w-screen-lg items-center text-center">
-          <div className="block block-email-text max-w-2xl py-10 mx-auto">
-            <div className="block">
-              <span className="text-3xl font-bold">{emailSubscriptionTitle}</span>
-              <p className="block mt-2">
-                <span className="mx-auto text-base text-slate-500 dark:text-navy-300">{emailSubscriptionSubtitle}</span>
-              </p>
-              <div className="block mt-5">
-                {subscriptionStatus === "success" && (
-                  <label className="block">
-                    <label className="text-success">Subscribed!</label>
-                  </label>
-                )}
-                {subscriptionStatus === "error" && (
-                  <label className="block">
-                    <label className="text-error">Something went wrong. Please try again.</label>
-                  </label>
-                )}
-              </div>
-              <div className="block mt-5">
-                <form onSubmit={handleNewsletterSubmit} method="post">
-                  <div className="block grid grid-cols-12 items-center justify-center gap-4">
-                    <div className="block col-span-12 lg:col-span-7">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="form-input w-full rounded-lg border border-slate-300 dark:border-navy-450 px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-slate-500"
-                        placeholder="Enter your email address"
-                        required
-                      />
+      {showNewsletter && (
+        <div className="block block-sub-email mt-20 px-4 bg-slate-100 dark:bg-navy-800">
+          <div className="block mx-auto max-w-screen-lg items-center text-center">
+            <div className="block block-email-text max-w-2xl py-10 mx-auto">
+              <div className="block">
+                <span className="text-3xl font-bold">{emailSubscriptionTitle}</span>
+                <p className="block mt-2">
+                  <span className="mx-auto text-base text-slate-500 dark:text-navy-300">{emailSubscriptionSubtitle}</span>
+                </p>
+                <div className="block mt-5">
+                  {subscriptionStatus === "success" && (
+                    <label className="block">
+                      <label className="text-success">Subscribed!</label>
+                    </label>
+                  )}
+                  {subscriptionStatus === "error" && (
+                    <label className="block">
+                      <label className="text-error">Something went wrong. Please try again.</label>
+                    </label>
+                  )}
+                </div>
+                <div className="block mt-5">
+                  <form onSubmit={handleNewsletterSubmit} method="post">
+                    <div className="block grid grid-cols-12 items-center justify-center gap-4">
+                      <div className="block col-span-12 lg:col-span-7">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="form-input w-full rounded-lg border border-slate-300 dark:border-navy-450 px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-slate-500"
+                          placeholder="Enter your email address"
+                          required
+                        />
+                      </div>
+                      <div className="block col-span-12 lg:col-span-5">
+                        <button
+                          type="submit"
+                          className="btn space-x-2 w-full font-medium text-white"
+                          style={{ backgroundColor: "#16a34a" }}
+                        >
+                          <span>Subscribe Now</span>
+                          <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.4995 13.5001L20.9995 3.00005M10.6271 13.8281L13.2552 20.5861C13.4867 21.1815 13.6025 21.4791 13.7693 21.566C13.9139 21.6414 14.0862 21.5663C14.2308 21.5663C14.3977 21.4796 14.5139 21.1821 14.7461 20.587L21.3364 3.69925C21.5461 3.16207 21.6509 2.89348 21.5935 2.72185C21.5437 2.5728 21.4268 2.45583 21.2777 2.40604C21.1061 2.34871 20.8375 2.45352 20.3003 2.66315L3.41258 9.25349C2.8175 9.48572 2.51997 9.60183 2.43326 9.76873C2.35809 9.91342 2.35819 10.0857 2.43353 10.2303C2.52043 10.3971 2.81811 10.5128 3.41345 10.7444L10.1715 13.3725C10.2923 13.4195 10.3527 13.443 10.4036 13.4793C10.4487 13.5114 10.4881 13.5509 10.5203 13.596C10.5566 13.6468 10.5801 13.7073 10.6271 13.8281Z"></path>
+                            </svg>
+                          </span>
+                        </button>
+                      </div>
                     </div>
-                    <div className="block col-span-12 lg:col-span-5">
-                      <button
-                        type="submit"
-                        className="btn space-x-2 w-full font-medium text-white"
-                        style={{ backgroundColor: "#16a34a" }}
-                      >
-                        <span>Subscribe Now</span>
-                        <span>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.4995 13.5001L20.9995 3.00005M10.6271 13.8281L13.2552 20.5861C13.4867 21.1815 13.6025 21.4791 13.7693 21.566C13.9139 21.6414 14.0862 21.6415 14.2308 21.5663C14.3977 21.4796 14.5139 21.1821 14.7461 20.587L21.3364 3.69925C21.5461 3.16207 21.6509 2.89348 21.5935 2.72185C21.5437 2.5728 21.4268 2.45583 21.2777 2.40604C21.1061 2.34871 20.8375 2.45352 20.3003 2.66315L3.41258 9.25349C2.8175 9.48572 2.51997 9.60183 2.43326 9.76873C2.35809 9.91342 2.35819 10.0857 2.43353 10.2303C2.52043 10.3971 2.81811 10.5128 3.41345 10.7444L10.1715 13.3725C10.2923 13.4195 10.3527 13.443 10.4036 13.4793C10.4487 13.5114 10.4881 13.5509 10.5203 13.596C10.5566 13.6468 10.5801 13.7073 10.6271 13.8281Z"></path>
-                          </svg>
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* <FloatingShoppingBag show={true} /> */}
     </div>

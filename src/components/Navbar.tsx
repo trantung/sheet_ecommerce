@@ -24,6 +24,10 @@ export default function Navbar() {
   const hasAboutUsPage = siteData?.header?.pages?.some(page => page.page_address === "about-us")
   const aboutUsRoute = hasAboutUsPage ? "/about-us" : "/"
 
+  const showDarkMode = siteData?.configs?.dark_mode === 1
+  const showAboutUs = siteData?.configs?.about_us === 1
+  const showFeedback = siteData?.configs?.feedback_form === 1
+
   if (loading) {
     return (
       <div className="block block-header dark:border-navy-500 py-3 px-4">
@@ -79,11 +83,13 @@ export default function Navbar() {
               </div>
               <div className="block block-menu">
                 <div className="space-x-4 hidden lg:flex justify-between items-center">
-                  {/* <button className="btn h-8 w-8 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
-                    </svg>
-                  </button> */}
+                  {showDarkMode && (
+                    <button className="btn h-8 w-8 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
+                      </svg>
+                    </button>
+                  )}
 
                   {/* Dynamic Pages */}
                   {/* {siteData?.header?.pages
@@ -113,9 +119,18 @@ export default function Navbar() {
                   ))}
 
                   {/* About Us */}
-                  <Link href={aboutUsRoute} className="btn hover:bg-slate-300/20 border border-slate-200 dark:border-navy-450">
-                    About us
-                  </Link>
+                  {showAboutUs && (
+                    <Link href={aboutUsRoute} className="btn hover:bg-slate-300/20 border border-slate-200 dark:border-navy-450">
+                      About us
+                    </Link>
+                  )}
+
+                  {/* Feedback */}
+                  {showFeedback && (
+                    <Link href="/feedback" className="btn hover:bg-slate-300/20 border border-slate-200 dark:border-navy-450">
+                      Feedback
+                    </Link>
+                  )}
 
                   {/* Header Link CTA */}
                   {headerLink && headerLinkText && (
@@ -128,12 +143,14 @@ export default function Navbar() {
                     </Link>
                   )}
                 </div>
-                <div className="block flex items-center lg:hidden space-x-2">
-                  <button className="btn h-8 w-8 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
-                    </svg>
-                  </button>
+                 <div className="block flex items-center lg:hidden space-x-2">
+                  {showDarkMode && (
+                    <button className="btn h-8 w-8 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={() => setDrawerOpen(!drawerOpen)}
                     className="btn border border-slate-300 p-2 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500"
@@ -238,15 +255,30 @@ export default function Navbar() {
               ))}
 
               {/* About Us Mobile */}
-              <li>
-                <Link
-                  href={aboutUsRoute}
-                  onClick={() => setDrawerOpen(false)}
-                  className="group flex space-x-2 rounded-lg px-4 py-2.5 tracking-wide outline-none transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100"
-                >
-                  <span>About us</span>
-                </Link>
-              </li>
+              {showAboutUs && (
+                <li>
+                  <Link
+                    href={aboutUsRoute}
+                    onClick={() => setDrawerOpen(false)}
+                    className="group flex space-x-2 rounded-lg px-4 py-2.5 tracking-wide outline-none transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100"
+                  >
+                    <span>About us</span>
+                  </Link>
+                </li>
+              )}
+
+              {/* Feedback Mobile */}
+              {showFeedback && (
+                <li>
+                  <Link
+                    href="/feedback"
+                    onClick={() => setDrawerOpen(false)}
+                    className="group flex space-x-2 rounded-lg px-4 py-2.5 tracking-wide outline-none transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100"
+                  >
+                    <span>Feedback</span>
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>

@@ -23,18 +23,7 @@ export default function SearchAndFilters({ onSearchChange, onCategoryChange, onS
   }
 
   const handleSortChange = (value: string) => {
-    // Map template sort values to component values
-    if (value === "price") {
-      onSortChange("price-low")
-    } else if (value === "-price") {
-      onSortChange("price-high")
-    } else if (value === "name") {
-      onSortChange("name")
-    } else if (value === "-name") {
-      onSortChange("name")
-    } else {
-      onSortChange("featured")
-    }
+    onSortChange(value)
   }
 
   return (
@@ -65,7 +54,7 @@ export default function SearchAndFilters({ onSearchChange, onCategoryChange, onS
             >
               <option value="all">All categories</option>
               {categories.map((category) => (
-                <option key={category.category_id} value={category.category_name}>
+                <option key={category.category_id} value={category.category_id}>
                   {category.category_name}
                 </option>
               ))}
@@ -80,10 +69,10 @@ export default function SearchAndFilters({ onSearchChange, onCategoryChange, onS
               onChange={(e) => handleSortChange(e.target.value)}
             >
               <option value="">Order by</option>
-              <option value="price">⬇️ Price</option>
-              <option value="-price">⬆️ Price</option>
-              <option value="name">⬇️ Name A-Z</option>
-              <option value="-name">⬆️ Name Z-A</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="name_asc">Name: A to Z</option>
+              <option value="name_desc">Name: Z to A</option>
             </select>
           </div>
         </div>

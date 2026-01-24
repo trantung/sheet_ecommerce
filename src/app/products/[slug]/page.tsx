@@ -191,12 +191,10 @@ export default function ProductDetail() {
               <div className="block col-span-12 lg:col-span-6">
                 <div className="block block-image-main">
                   <div className="relative h-160 w-full">
-                    <Image
+                    <img
                       src={selectedImage || product.image || "/placeholder.svg"}
                       alt={product.name}
-                      fill
-                      className="object-cover object-center rounded"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="w-full h-full object-cover object-center rounded"
                     />
                   </div>
                 </div>
@@ -214,7 +212,7 @@ export default function ProductDetail() {
                             setSelectedImageIndex(index)
                           }}
                         >
-                          <Image
+                          <img
                             src={image || "/placeholder.svg"}
                             alt={`${product.name} view ${index + 1}`}
                             width={64}
@@ -347,14 +345,14 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Divider */}
-      <div className="block mx-auto w-full py-20">
-        <div className="h-px bg-slate-100 dark:bg-navy-500"></div>
-      </div>
+        {/* Divider */}
+        <div className="block mx-auto w-full py-20">
+          <div className="h-px bg-slate-100 dark:bg-navy-500"></div>
+        </div>
 
-      <RelatedProducts products={relatedProducts} title={relatedProductsTitle} />
+        <RelatedProducts products={relatedProducts} title={relatedProductsTitle} />
+      </div>
 
       <AddToCartModal
         isOpen={showCartModal}
