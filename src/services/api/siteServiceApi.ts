@@ -254,6 +254,56 @@ class SiteServiceApi {
             throw error
         }
     }
+
+    async searchProducts(keyword?: string, category_id?: number | string, order_by?: string): Promise<ProductItem[]> {
+        try {
+            const response = await fetch(`${this.baseUrl}/product/search`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ keyword, category_id, order_by }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.status || !result.data) {
+                return []; // Return empty array if no data found
+            }
+
+            return result.data as ProductItem[];
+        } catch (error) {
+            console.error("Search product failed:", error);
+            throw error;
+        }
+    }
+
+    async subscribeEmail(email: string): Promise<{ success: boolean; message: string | null }> {
+        try {
+            const response = await fetch(`${this.baseUrl}/web/web-email`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ email }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error("Email subscription failed:", error);
+            throw error;
+        }
+    }
 }
 
 export const siteServiceApi = new SiteServiceApi();

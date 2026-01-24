@@ -22,21 +22,21 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="block border rounded-lg dark:border-navy-450 overflow-hidden">
         <div className="block block-image">
           {product.image ? (
-            <div className="relative w-full aspect-square lg:aspect-auto lg:h-80 lg:w-80 overflow-hidden">
-              <Image
+            <div className="relative w-full aspect-square lg:h-80 overflow-hidden rounded-t-lg">
+              <img
                 src={product.image}
                 alt={product.name}
-                fill
-                className="object-cover object-center rounded-t-lg"
-                sizes="(max-width: 1024px) 100vw, 320px"
+                className="absolute inset-0 w-full h-full object-cover object-center"
                 onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.setAttribute("data-error", "1")
+                  const img = e.currentTarget
+                  if (img.dataset.error) return
+                  img.dataset.error = "1"
+                  img.src = "/placeholder.svg"
                 }}
               />
             </div>
           ) : (
-            <div className="w-full aspect-square lg:aspect-auto lg:h-80 lg:w-80 bg-gray-100 rounded-t-lg flex items-center justify-center text-gray-400">
+            <div className="w-full aspect-square lg:h-80 bg-gray-100 rounded-t-lg flex items-center justify-center text-gray-400">
               No Image
             </div>
           )}

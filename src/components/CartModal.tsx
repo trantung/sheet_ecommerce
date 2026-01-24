@@ -153,12 +153,13 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                     <div className="block block-item grid grid-cols-2 items-center">
                                         <div className="block block-item-image flex space-x-2 items-center">
                                             <span className="block">
-                                                <Image
+                                                <img
                                                     src={item.thumbnail || "/placeholder.svg?height=64&width=64"}
                                                     alt={item.name}
                                                     width={64}
                                                     height={64}
                                                     className="w-12 h-12 lg:w-16 lg:h-16 object-center object-cover rounded-lg"
+                                                    loading="lazy"
                                                 />
                                             </span>
                                             <span className="block">
