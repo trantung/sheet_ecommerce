@@ -5,6 +5,8 @@ import "./globals.css"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import BackToTop from "@/components/BackToTop"
+import { CartProvider } from "@/contexts/CartContext"
+import { SiteDataProvider } from "@/contexts/SiteDataContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,10 +23,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <BackToTop />
+        <SiteDataProvider>
+          <CartProvider>
+            <Navbar />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+            <BackToTop />
+          </CartProvider>
+        </SiteDataProvider>
       </body>
     </html>
   )

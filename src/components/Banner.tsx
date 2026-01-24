@@ -2,28 +2,11 @@
 
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { siteServiceApi, type SiteData } from "@/services/api/siteServiceApi"
+import { siteServiceApi } from "@/services/api/siteServiceApi"
+import { useSiteData } from "@/contexts/SiteDataContext"
 
 export default function Banner() {
-  const [siteData, setSiteData] = useState<SiteData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchSiteData = async () => {
-      try {
-        const response = await siteServiceApi.getSiteData()
-        if (response.status) {
-          setSiteData(response.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch site data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSiteData()
-  }, [])
+  const { siteData, loading } = useSiteData()
 
   const getSiteInfo = (code: string) => {
     return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)

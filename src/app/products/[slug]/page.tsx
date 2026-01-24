@@ -9,12 +9,13 @@ import AddToCartModal from "@/components/AddToCartModal"
 import OrderConfirmationModal from "@/components/OrderConfirmationModal"
 import FloatingShoppingBag from "@/components/FloatingShoppingBag"
 import { siteServiceApi, type ProductItem, type ProductDetailResponse } from "@/services/api/siteServiceApi"
+import { useSiteData } from "@/contexts/SiteDataContext"
 
 // Helper function to transform API product to component format
 const transformProductItem = (item: ProductItem) => {
   const price = item.price ? parseFloat(item.price) : 0
   const originalPrice = item.old_price ? parseFloat(item.old_price) : undefined
-  
+
   // Parse images from JSON string
   let images: string[] = []
   if (item.images) {
@@ -60,6 +61,7 @@ const transformRelatedProduct = (item: ProductItem) => {
 export default function ProductDetail() {
   const params = useParams()
   const slug = params?.slug as string
+  const { siteData } = useSiteData()
 
   const [product, setProduct] = useState<ReturnType<typeof transformProductItem> | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<ReturnType<typeof transformRelatedProduct>[]>([])
@@ -70,6 +72,7 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState("")
   const [showCartModal, setShowCartModal] = useState(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+  const [orderNumber, setOrderNumber] = useState("")
   const [categoryName, setCategoryName] = useState("")
   const [relatedProductsTitle, setRelatedProductsTitle] = useState("Related Products")
 
@@ -77,17 +80,20 @@ export default function ProductDetail() {
     const fetchProductDetail = async () => {
       if (!slug) return
 
+      // If we already have this product loaded, no need to fetch again
+      if (product && product.id === slug) return
+
       try {
         setLoading(true)
         const response = await siteServiceApi.getProductDetail(slug)
-        
+
         if (response.detail && response.detail.length > 0) {
           const productData = transformProductItem(response.detail[0])
           setProduct(productData)
           setSelectedImage(productData.image)
           setSelectedSize(productData.sizes[0] || "")
           setSelectedColor(productData.colors[0] || "")
-          
+
           // Get category name from first category
           if (response.detail[0].category_relate && response.detail[0].category_relate.length > 0) {
             setCategoryName(response.detail[0].category_relate[0].category_name)
@@ -99,12 +105,10 @@ export default function ProductDetail() {
           setRelatedProducts(related)
         }
 
-        // Get related products title from site_informations
-        if (response.site_informations) {
-          const title = siteServiceApi.getSiteInfoByCode(response.site_informations, "related_products")
-          if (title) {
-            setRelatedProductsTitle(title)
-          }
+        // Get related products title from siteData if not provided by detail response
+        const title = siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], "related_products")
+        if (title) {
+          setRelatedProductsTitle(title)
         }
       } catch (error) {
         console.error("Failed to fetch product detail:", error)
@@ -114,13 +118,14 @@ export default function ProductDetail() {
     }
 
     fetchProductDetail()
-  }, [slug])
+  }, [slug, siteData])
 
   const handleAddToCart = () => {
     setShowCartModal(true)
   }
 
-  const handleOrderComplete = () => {
+  const handleOrderComplete = (orderNo: string) => {
+    setOrderNumber(orderNo)
     setShowConfirmationModal(true)
   }
 
@@ -199,11 +204,10 @@ export default function ProductDetail() {
                     {allImages.map((image, index) => (
                       <span key={index}>
                         <span
-                          className={`border-2 block border rounded p-1 cursor-pointer dark:border-navy-450 ${
-                            selectedImage === image
-                              ? "border-slate-500 dark:border-navy-300 shadow-lg"
-                              : "border-slate-300 dark:border-navy-450"
-                          }`}
+                          className={`border-2 block border rounded p-1 cursor-pointer dark:border-navy-450 ${selectedImage === image
+                            ? "border-slate-500 dark:border-navy-300 shadow-lg"
+                            : "border-slate-300 dark:border-navy-450"
+                            }`}
                           onClick={() => setSelectedImage(image)}
                         >
                           <Image
@@ -277,9 +281,8 @@ export default function ProductDetail() {
                     <button
                       disabled={quantity <= 1}
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className={`btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 ${
-                        quantity <= 1 ? "opacity-50" : ""
-                      }`}
+                      className={`btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 ${quantity <= 1 ? "opacity-50" : ""
+                        }`}
                     >
                       <span>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,9 +353,14 @@ export default function ProductDetail() {
           image: product.image,
           sku: product.sku,
         }}
+        initialQuantity={quantity}
       />
 
-      <OrderConfirmationModal isOpen={showConfirmationModal} onClose={() => setShowConfirmationModal(false)} />
+      <OrderConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+        orderNumber={orderNumber}
+      />
 
       <FloatingShoppingBag show={true} />
     </div>

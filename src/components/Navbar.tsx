@@ -2,30 +2,13 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { siteServiceApi, type SiteData } from "@/services/api/siteServiceApi"
+import { siteServiceApi } from "@/services/api/siteServiceApi"
+import { useSiteData } from "@/contexts/SiteDataContext"
 import Image from "next/image"
 
 export default function Navbar() {
-  const [siteData, setSiteData] = useState<SiteData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { siteData, loading } = useSiteData()
   const [drawerOpen, setDrawerOpen] = useState(false)
-
-  useEffect(() => {
-    const fetchSiteData = async () => {
-      try {
-        const response = await siteServiceApi.getSiteData()
-        if (response.status) {
-          setSiteData(response.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch site data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSiteData()
-  }, [])
 
   const getSiteInfo = (code: string) => {
     return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)

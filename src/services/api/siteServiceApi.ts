@@ -121,6 +121,7 @@ export interface ProductDetailResponse {
 
 class SiteServiceApi {
     private baseUrl: string;
+    private productCache: Record<string, ProductDetailResponse> = {};
 
     constructor() {
         if (!API_BASE_URL) {
@@ -222,6 +223,10 @@ class SiteServiceApi {
     }
 
     async getProductDetail(slug: string): Promise<ProductDetailResponse> {
+        if (this.productCache[slug]) {
+            return this.productCache[slug];
+        }
+
         try {
             const response = await fetch(`${this.baseUrl}/product/detail`, {
                 method: "POST",
@@ -241,7 +246,9 @@ class SiteServiceApi {
                 return { detail: [], product_relate: [] } // Return empty arrays if no data found
             }
 
-            return result.data as ProductDetailResponse
+            const productData = result.data as ProductDetailResponse;
+            this.productCache[slug] = productData;
+            return productData;
         } catch (error) {
             console.error("Failed to fetch product detail:", error)
             throw error

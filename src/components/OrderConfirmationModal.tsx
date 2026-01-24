@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useSiteData } from "@/contexts/SiteDataContext"
+import { siteServiceApi } from "@/services/api/siteServiceApi"
 import Modal from "./Modal"
-import { siteServiceApi, type SiteData } from "@/services/api/siteServiceApi"
 
 interface OrderConfirmationModalProps {
   isOpen: boolean
@@ -10,22 +10,8 @@ interface OrderConfirmationModalProps {
   orderNumber?: string
 }
 
-export default function OrderConfirmationModal({ isOpen, onClose, orderNumber = "#28615918" }: OrderConfirmationModalProps) {
-  const [siteData, setSiteData] = useState<SiteData | null>(null)
-
-  useEffect(() => {
-    const fetchSiteData = async () => {
-      try {
-        const response = await siteServiceApi.getSiteData()
-        if (response.status) {
-          setSiteData(response.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch site data:", error)
-      }
-    }
-    fetchSiteData()
-  }, [])
+export default function OrderConfirmationModal({ isOpen, onClose, orderNumber }: OrderConfirmationModalProps) {
+  const { siteData } = useSiteData()
 
   const getSiteInfo = (code: string) => {
     return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)

@@ -7,8 +7,9 @@ import Banner from "@/components/Banner"
 import ProductList from "@/components/ProductList"
 import SearchAndFilters from "@/components/SearchAndFilters"
 import ProductCard from "@/components/ProductCard"
-import FloatingShoppingBag from "@/components/FloatingShoppingBag"
+// import FloatingShoppingBag from "@/components/FloatingShoppingBag"
 import { siteServiceApi, type SiteData, type Product as ApiProduct } from "@/services/api/siteServiceApi"
+import { useSiteData } from "@/contexts/SiteDataContext"
 
 interface Product {
   id: string
@@ -99,25 +100,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("featured")
   const [email, setEmail] = useState("")
-  const [siteData, setSiteData] = useState<SiteData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchSiteData = async () => {
-      try {
-        const response = await siteServiceApi.getSiteData()
-        if (response.status) {
-          setSiteData(response.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch site data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchSiteData()
-  }, [])
+  const { siteData, loading } = useSiteData()
 
   const getSiteInfo = (code: string) => {
     return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)
@@ -386,7 +369,7 @@ export default function Home() {
         </div>
       </div>
 
-      <FloatingShoppingBag show={true} />
+      {/* <FloatingShoppingBag show={true} /> */}
     </div>
   )
 }

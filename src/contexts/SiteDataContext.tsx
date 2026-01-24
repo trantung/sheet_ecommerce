@@ -16,6 +16,8 @@ export function SiteDataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchSiteData = async () => {
+      if (siteData) return
+
       try {
         const response = await siteServiceApi.getSiteData()
         if (response.status) {
@@ -29,7 +31,7 @@ export function SiteDataProvider({ children }: { children: React.ReactNode }) {
     }
 
     fetchSiteData()
-  }, [])
+  }, [siteData])
 
   return (
     <SiteDataContext.Provider value={{ siteData, loading }}>
