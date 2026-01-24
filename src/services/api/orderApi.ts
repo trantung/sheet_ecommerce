@@ -37,6 +37,7 @@ export interface OrderApiResponse {
 }
 
 export interface CreateOrderRequest {
+    cart_token?: string;
     name: string;
     email: string;
     phone: string;
@@ -68,6 +69,7 @@ class OrderApi {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(orderData),
             });
 

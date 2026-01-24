@@ -16,7 +16,7 @@ interface CartModalProps {
 }
 
 export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModalProps) {
-    const { cart, removeFromCart, updateCart } = useCart()
+    const { cart, removeFromCart, updateCart, refreshCart } = useCart()
     const { siteData } = useSiteData()
     const [discountCode, setDiscountCode] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -32,25 +32,25 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
         return siteServiceApi.getSiteInfoByCode(siteData?.site_informations || [], code)
     }
 
-    const cartProducts = cart?.products || []
+    const cartProducts = cart?.items || []
     const subtotal = cart?.subtotal || 0
     const discount = 0
     const shippingFee = getSiteInfo("shipping_fee") ? parseFloat(getSiteInfo("shipping_fee")) : 0
     const shipping = shippingFee
     const total = subtotal - discount + shipping
 
-    const handleQuantityChange = async (sku: string, newQuantity: number) => {
+    const handleQuantityChange = async (productId: number, variantId: number | null, newQuantity: number) => {
         if (newQuantity < 1) return
         try {
-            await updateCart(sku, newQuantity)
+            await updateCart(productId, variantId, newQuantity)
         } catch (error) {
             console.error("Failed to update quantity:", error)
         }
     }
 
-    const handleRemoveProduct = async (sku: string) => {
+    const handleRemoveProduct = async (productId: number, variantId: number | null) => {
         try {
-            await removeFromCart(sku)
+            await removeFromCart(productId, variantId)
         } catch (error) {
             console.error("Failed to remove product:", error)
         }
@@ -79,8 +79,15 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
             })
 
             if (orderResponse.success) {
-                onOrderComplete(orderResponse.data.order_no)
+                // First close this modal
                 onClose()
+
+                // Then refresh cart and show confirmation after a small delay
+                // to avoid overlap and allow exit animation to start
+                setTimeout(async () => {
+                    await refreshCart()
+                    onOrderComplete(orderResponse.data.order_no)
+                }, 100)
 
                 // Reset form
                 setFormData({
@@ -142,7 +149,7 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                     ) : (
                         <div className="block block-items">
                             {cartProducts.map((item) => (
-                                <div key={item.sku} className="block mt-3">
+                                <div key={`${item.product_id}-${item.variant_id}`} className="block mt-3">
                                     <div className="block block-item grid grid-cols-2 items-center">
                                         <div className="block block-item-image flex space-x-2 items-center">
                                             <span className="block">
@@ -164,7 +171,7 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                             <div className="block block-item-quantity flex space-x-1 mt-2 items-center">
                                                 <button
                                                     disabled={item.quantity <= 1}
-                                                    onClick={() => handleQuantityChange(item.sku, item.quantity - 1)}
+                                                    onClick={() => handleQuantityChange(item.product_id, item.variant_id, item.quantity - 1)}
                                                     className={`btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 ${item.quantity <= 1 ? "opacity-50" : ""
                                                         }`}
                                                 >
@@ -179,12 +186,12 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     value={item.quantity}
                                                     onChange={(e) => {
                                                         const val = parseInt(e.target.value) || 1
-                                                        handleQuantityChange(item.sku, Math.max(1, val))
+                                                        handleQuantityChange(item.product_id, item.variant_id, Math.max(1, val))
                                                     }}
                                                     className="form-input h-8 w-12 text-center rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 dark:border-navy-450 dark:hover:border-navy-400"
                                                 />
                                                 <button
-                                                    onClick={() => handleQuantityChange(item.sku, item.quantity + 1)}
+                                                    onClick={() => handleQuantityChange(item.product_id, item.variant_id, item.quantity + 1)}
                                                     className="btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500"
                                                 >
                                                     <span>
@@ -198,7 +205,7 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                 <div className="block flex space-x-4 items-center">
                                                     <span className="font-semibold text-base">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
                                                     <button
-                                                        onClick={() => handleRemoveProduct(item.sku)}
+                                                        onClick={() => handleRemoveProduct(item.product_id, item.variant_id)}
                                                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                                                         title="Remove item"
                                                     >
@@ -213,7 +220,8 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )
+                    }
                 </div>
                 {cartProducts.length > 0 && (
                     <>

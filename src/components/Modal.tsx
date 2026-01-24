@@ -1,6 +1,4 @@
-"use client"
-
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useState } from "react"
 
 interface ModalProps {
   isOpen: boolean
@@ -10,13 +8,38 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  if (!isOpen) return null
+  const [isRendered, setIsRendered] = useState(isOpen)
+  const [shouldAnimateOut, setShouldAnimateOut] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true)
+      setShouldAnimateOut(false)
+    } else if (isRendered) {
+      setShouldAnimateOut(true)
+      const timer = setTimeout(() => {
+        setIsRendered(false)
+        setShouldAnimateOut(false)
+      }, 200) // Match duration of animate-modal-out
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, isRendered])
+
+  if (!isRendered) return null
 
   return (
     <div className="block block-modal-checkout bg-white text-slate-900 dark:bg-navy-900 dark:text-white">
-      <div className="show modal modal-scale fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden px-4 py-6 sm:px-5" role="dialog">
-        <div className="modal-overlay w-full absolute inset-0 bg-slate-900/60" onClick={onClose}></div>
-        <div className="max-w-4xl relative flex w-full origin-top flex-col overflow-hidden rounded-lg bg-white dark:bg-navy-700">
+      <div
+        className={`modal fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden px-4 py-6 sm:px-5`}
+        role="dialog"
+      >
+        <div
+          className={`modal-overlay w-full absolute inset-0 bg-slate-900/60 ${shouldAnimateOut ? 'animate-backdrop-out' : 'animate-backdrop-in'}`}
+          onClick={onClose}
+        ></div>
+        <div
+          className={`max-w-4xl relative flex w-full origin-top flex-col overflow-hidden rounded-lg bg-white dark:bg-navy-700 ${shouldAnimateOut ? 'animate-modal-out' : 'animate-modal-in'}`}
+        >
           {title && (
             <div className="flex justify-between items-center rounded-t-lg bg-slate-50 px-4 py-2 dark:bg-navy-800">
               <span className="font-bold">{title}</span>
@@ -30,10 +53,11 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
               </button>
             </div>
           )}
-          <div className="scrollbar-sm overflow-y-auto px-4">{children}</div>
+          <div className="scrollbar-sm overflow-y-auto px-4 py-4">{children}</div>
         </div>
       </div>
     </div>
   )
 }
+
 

@@ -6,9 +6,10 @@ import CartModal from "@/components/CartModal"
 
 interface FloatingShoppingBagProps {
     show: boolean
+    onOrderComplete?: (orderNumber: string) => void
 }
 
-export default function FloatingShoppingBag({ show }: FloatingShoppingBagProps) {
+export default function FloatingShoppingBag({ show, onOrderComplete }: FloatingShoppingBagProps) {
     const { cart } = useCart()
     const [showCartModal, setShowCartModal] = useState(false)
 
@@ -16,8 +17,11 @@ export default function FloatingShoppingBag({ show }: FloatingShoppingBagProps) 
 
     const cartCount = cart?.count || 0
 
-    const handleOrderComplete = () => {
+    const handleOrderComplete = (orderNumber: string) => {
         setShowCartModal(false)
+        if (onOrderComplete) {
+            onOrderComplete(orderNumber)
+        }
     }
 
     return (

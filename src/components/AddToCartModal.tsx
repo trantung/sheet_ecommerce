@@ -9,6 +9,7 @@ interface AddToCartModalProps {
   onClose: () => void
   onOrderComplete: (orderNumber: string) => void
   product: {
+    id: number
     name: string
     price: number
     image: string
@@ -23,9 +24,9 @@ export default function AddToCartModal({ isOpen, onClose, onOrderComplete, produ
 
   // Add product to cart when modal opens (only once)
   useEffect(() => {
-    if (isOpen && product.sku && !hasAddedToCart.current) {
+    if (isOpen && product.id && !hasAddedToCart.current) {
       hasAddedToCart.current = true
-      addToCart(product.sku, initialQuantity).catch(error => {
+      addToCart(product.id, null, initialQuantity).catch(error => {
         console.error("Failed to add product to cart:", error)
         hasAddedToCart.current = false
       })

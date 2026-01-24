@@ -1,19 +1,20 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL_API;
 
 export interface CartProduct {
+    product_id: number;
+    variant_id: number | null;
     sku: string;
     name: string;
     price: string;
     quantity: number;
-    product_id: number;
     thumbnail?: string;
 }
 
 export interface CartData {
-    products: CartProduct[];
+    items: CartProduct[];
     subtotal: number;
     count: number;
-    cart_id: string;
+    updated_at: string;
 }
 
 export interface CartApiResponse {
@@ -25,7 +26,6 @@ export interface CartApiResponse {
 
 class CartApi {
     private baseUrl: string;
-    private cartIdKey = 'cart_id';
 
     constructor() {
         if (!API_BASE_URL) {
@@ -34,20 +34,8 @@ class CartApi {
         this.baseUrl = API_BASE_URL as string;
     }
 
-    // Get cart ID from localStorage
-    private getCartId(): string | null {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem(this.cartIdKey);
-    }
-
-    // Save cart ID to localStorage
-    private saveCartId(cartId: string): void {
-        if (typeof window === 'undefined') return;
-        localStorage.setItem(this.cartIdKey, cartId);
-    }
-
     // Add product to cart
-    async addToCart(sku: string, quantity: number): Promise<CartApiResponse> {
+    async addToCart(productId: number, variantId: number | null, qty: number): Promise<CartApiResponse> {
         try {
             const response = await fetch(`${this.baseUrl}/cart/add`, {
                 method: 'POST',
@@ -55,21 +43,19 @@ class CartApi {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sku, quantity }),
+                credentials: 'include',
+                body: JSON.stringify({
+                    product_id: productId,
+                    variant_id: variantId,
+                    qty
+                }),
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result: CartApiResponse = await response.json();
-
-            // Save cart ID
-            if (result.success && result.data.cart_id) {
-                this.saveCartId(result.data.cart_id);
-            }
-
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Add to cart failed:', error);
             throw error;
@@ -77,7 +63,7 @@ class CartApi {
     }
 
     // Remove product from cart
-    async removeFromCart(sku: string): Promise<CartApiResponse> {
+    async removeFromCart(productId: number, variantId: number | null): Promise<CartApiResponse> {
         try {
             const response = await fetch(`${this.baseUrl}/cart/remove`, {
                 method: 'POST',
@@ -85,21 +71,18 @@ class CartApi {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sku }),
+                credentials: 'include',
+                body: JSON.stringify({
+                    product_id: productId,
+                    variant_id: variantId
+                }),
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result: CartApiResponse = await response.json();
-
-            // Update cart ID
-            if (result.success && result.data.cart_id) {
-                this.saveCartId(result.data.cart_id);
-            }
-
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Remove from cart failed:', error);
             throw error;
@@ -107,7 +90,7 @@ class CartApi {
     }
 
     // Update cart product quantity
-    async updateCart(sku: string, quantity: number): Promise<CartApiResponse> {
+    async updateCart(productId: number, variantId: number | null, qty: number): Promise<CartApiResponse> {
         try {
             const response = await fetch(`${this.baseUrl}/cart/update`, {
                 method: 'POST',
@@ -115,21 +98,19 @@ class CartApi {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sku, quantity }),
+                credentials: 'include',
+                body: JSON.stringify({
+                    product_id: productId,
+                    variant_id: variantId,
+                    qty
+                }),
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result: CartApiResponse = await response.json();
-
-            // Update cart ID
-            if (result.success && result.data.cart_id) {
-                this.saveCartId(result.data.cart_id);
-            }
-
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Update cart failed:', error);
             throw error;
@@ -145,23 +126,41 @@ class CartApi {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: '',
+                credentials: 'include',
+                body: JSON.stringify({}),
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result: CartApiResponse = await response.json();
-
-            // Update cart ID
-            if (result.success && result.data.cart_id) {
-                this.saveCartId(result.data.cart_id);
-            }
-
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Get cart failed:', error);
+            throw error;
+        }
+    }
+
+    // Clear cart
+    async clearCart(): Promise<{ success: boolean; message: string }> {
+        try {
+            const response = await fetch(`${this.baseUrl}/cart/clear`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({}),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Clear cart failed:', error);
             throw error;
         }
     }

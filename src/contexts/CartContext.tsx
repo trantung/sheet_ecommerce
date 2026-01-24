@@ -6,9 +6,10 @@ import { cartApi, type CartData, type CartProduct } from '@/services/api/cartApi
 interface CartContextType {
     cart: CartData | null;
     loading: boolean;
-    addToCart: (sku: string, quantity: number) => Promise<void>;
-    removeFromCart: (sku: string) => Promise<void>;
-    updateCart: (sku: string, quantity: number) => Promise<void>;
+    addToCart: (productId: number, variantId: number | null, quantity: number) => Promise<void>;
+    removeFromCart: (productId: number, variantId: number | null) => Promise<void>;
+    updateCart: (productId: number, variantId: number | null, quantity: number) => Promise<void>;
+    clearCart: () => Promise<void>;
     refreshCart: () => Promise<void>;
 }
 
@@ -37,10 +38,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         refreshCart();
     }, [refreshCart]);
 
-    const addToCart = async (sku: string, quantity: number) => {
+    const addToCart = async (productId: number, variantId: number | null, quantity: number) => {
         try {
             setLoading(true);
-            const response = await cartApi.addToCart(sku, quantity);
+            const response = await cartApi.addToCart(productId, variantId, quantity);
             if (response.success) {
                 setCart(response.data);
             }
@@ -52,10 +53,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const removeFromCart = async (sku: string) => {
+    const removeFromCart = async (productId: number, variantId: number | null) => {
         try {
             setLoading(true);
-            const response = await cartApi.removeFromCart(sku);
+            const response = await cartApi.removeFromCart(productId, variantId);
             if (response.success) {
                 setCart(response.data);
             }
@@ -67,15 +68,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const updateCart = async (sku: string, quantity: number) => {
+    const updateCart = async (productId: number, variantId: number | null, quantity: number) => {
         try {
             setLoading(true);
-            const response = await cartApi.updateCart(sku, quantity);
+            const response = await cartApi.updateCart(productId, variantId, quantity);
             if (response.success) {
                 setCart(response.data);
             }
         } catch (error) {
             console.error('Failed to update cart:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const clearCart = async () => {
+        try {
+            setLoading(true);
+            const response = await cartApi.clearCart();
+            if (response.success) {
+                setCart(null);
+            }
+        } catch (error) {
+            console.error('Failed to clear cart:', error);
             throw error;
         } finally {
             setLoading(false);
@@ -90,6 +106,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 addToCart,
                 removeFromCart,
                 updateCart,
+                clearCart,
                 refreshCart,
             }}
         >

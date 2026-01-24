@@ -29,7 +29,8 @@ const transformProductItem = (item: ProductItem) => {
   }
 
   return {
-    id: item.slug,
+    id: item.id,
+    slug: item.slug,
     name: item.title,
     sku: item.slug,
     price,
@@ -81,7 +82,7 @@ export default function ProductDetail() {
       if (!slug) return
 
       // If we already have this product loaded, no need to fetch again
-      if (product && product.id === slug) return
+      if (product && product.slug === slug) return
 
       try {
         setLoading(true)
@@ -348,6 +349,7 @@ export default function ProductDetail() {
         onClose={() => setShowCartModal(false)}
         onOrderComplete={handleOrderComplete}
         product={{
+          id: product.id,
           name: product.name,
           price: product.price,
           image: product.image,
@@ -362,7 +364,7 @@ export default function ProductDetail() {
         orderNumber={orderNumber}
       />
 
-      <FloatingShoppingBag show={true} />
+      <FloatingShoppingBag show={true} onOrderComplete={handleOrderComplete} />
     </div>
   )
 }
