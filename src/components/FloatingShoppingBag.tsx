@@ -1,50 +1,54 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ShoppingBag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState } from "react"
+import { useCart } from "@/contexts/CartContext"
+import CartModal from "@/components/CartModal"
 
 interface FloatingShoppingBagProps {
     show: boolean
+    onOrderComplete?: (orderNumber: string) => void
 }
 
-export default function FloatingShoppingBag({ show }: FloatingShoppingBagProps) {
-    const [isVisible, setIsVisible] = useState(false)
+export default function FloatingShoppingBag({ show, onOrderComplete }: FloatingShoppingBagProps) {
+    const { cart } = useCart()
     const [showCartModal, setShowCartModal] = useState(false)
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsVisible(window.scrollY > 100 && show)
+    if (!show) return null
+
+    const cartCount = cart?.count || 0
+
+    const handleOrderComplete = (orderNumber: string) => {
+        setShowCartModal(false)
+        if (onOrderComplete) {
+            onOrderComplete(orderNumber)
         }
-
-        window.addEventListener("scroll", handleScroll)
-        return () => window.removeEventListener("scroll", handleScroll)
-    }, [show])
-
-    if (!isVisible) return null
+    }
 
     return (
         <>
-            <Button
-                onClick={() => setShowCartModal(true)}
-                className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-green-600 hover:bg-green-700 shadow-lg"
-                size="icon"
-            >
-                <ShoppingBag className="h-6 w-6" />
-            </Button>
+            <div className="block block-card-order">
+                <span className="card-order" style={{ position: "fixed", top: "100px", right: "40px", zIndex: 99 }}>
+                    <button
+                        onClick={() => setShowCartModal(true)}
+                        className="btn relative w-12 h-12 border rounded-full bg-slate-50 dark:bg-sheetany border-2 border-slate-300 p-2 text-slate-600 hover:bg-navy-450 hover:text-white dark:border-sheetany dark:text-navy-100 dark:hover:bg-sheetany-700 dark:hover:text-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
+                        </svg>
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                {cartCount}
+                            </span>
+                        )}
+                    </button>
+                </span>
+            </div>
 
-            <Dialog open={showCartModal} onOpenChange={setShowCartModal}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Your cart</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-8 text-center text-gray-500">
-                        <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>Your cart is empty</p>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <CartModal
+                isOpen={showCartModal}
+                onClose={() => setShowCartModal(false)}
+                onOrderComplete={handleOrderComplete}
+            />
         </>
     )
 }
