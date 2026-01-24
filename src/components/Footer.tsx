@@ -48,7 +48,7 @@ export default function Footer() {
                     alt={siteName}
                     width={32}
                     height={32}
-                    className="mask rounded-full object-cover"
+                    className="mask object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
                       target.setAttribute("data-error", "1")

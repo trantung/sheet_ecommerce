@@ -100,6 +100,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("featured")
   const [email, setEmail] = useState("")
+  const [subscriptionStatus, setSubscriptionStatus] = useState<"idle" | "success" | "error">("idle")
+
   const { siteData, loading } = useSiteData()
 
   const getSiteInfo = (code: string) => {
@@ -163,10 +165,23 @@ export default function Home() {
     return filtered
   }, [searchTerm, selectedCategory, sortBy, allProducts, siteData])
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert(`Thank you for subscribing with email: ${email}`)
-    setEmail("")
+    if (!email) return
+
+    try {
+      setSubscriptionStatus("idle")
+      const result = await siteServiceApi.subscribeEmail(email)
+      if (result.success) {
+        setSubscriptionStatus("success")
+        setEmail("")
+      } else {
+        setSubscriptionStatus("error")
+      }
+    } catch (error) {
+      setSubscriptionStatus("error")
+      console.error("Subscription error:", error)
+    }
   }
 
   if (loading) {
@@ -334,6 +349,18 @@ export default function Home() {
               <p className="block mt-2">
                 <span className="mx-auto text-base text-slate-500 dark:text-navy-300">{emailSubscriptionSubtitle}</span>
               </p>
+              <div className="block mt-5">
+                {subscriptionStatus === "success" && (
+                  <label className="block">
+                    <label className="text-success">Subscribed!</label>
+                  </label>
+                )}
+                {subscriptionStatus === "error" && (
+                  <label className="block">
+                    <label className="text-error">Something went wrong. Please try again.</label>
+                  </label>
+                )}
+              </div>
               <div className="block mt-5">
                 <form onSubmit={handleNewsletterSubmit} method="post">
                   <div className="block grid grid-cols-12 items-center justify-center gap-4">
