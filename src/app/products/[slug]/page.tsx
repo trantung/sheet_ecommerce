@@ -38,8 +38,8 @@ const transformProductItem = (item: ProductItem) => {
     image: images[0] || item.thumbnail || "/placeholder.svg?height=600&width=600",
     thumbnails: images.slice(1),
     description: item.excerpt || item.content || "",
-    colors: item.color ? [item.color] : [],
-    sizes: item.size ? [item.size] : [],
+    colors: item.color ? item.color.split(",").map((s) => s.trim()) : [],
+    sizes: item.size ? item.size.split(",").map((s) => s.trim()) : [],
     images,
   }
 }
@@ -71,6 +71,7 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState("")
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState("")
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [showCartModal, setShowCartModal] = useState(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState(false)
   const [orderNumber, setOrderNumber] = useState("")
@@ -92,8 +93,7 @@ export default function ProductDetail() {
           const productData = transformProductItem(response.detail[0])
           setProduct(productData)
           setSelectedImage(productData.image)
-          setSelectedSize(productData.sizes[0] || "")
-          setSelectedColor(productData.colors[0] || "")
+          setSelectedImageIndex(0)
 
           // Get category name from first category
           if (response.detail[0].category_relate && response.detail[0].category_relate.length > 0) {
@@ -205,11 +205,14 @@ export default function ProductDetail() {
                     {allImages.map((image, index) => (
                       <span key={index}>
                         <span
-                          className={`border-2 block border rounded p-1 cursor-pointer dark:border-navy-450 ${selectedImage === image
+                          className={`border-2 block border rounded p-1 cursor-pointer dark:border-navy-450 ${selectedImageIndex === index
                             ? "border-slate-500 dark:border-navy-300 shadow-lg"
                             : "border-slate-300 dark:border-navy-450"
                             }`}
-                          onClick={() => setSelectedImage(image)}
+                          onClick={() => {
+                            setSelectedImage(image)
+                            setSelectedImageIndex(index)
+                          }}
                         >
                           <Image
                             src={image || "/placeholder.svg"}
@@ -236,11 +239,12 @@ export default function ProductDetail() {
                   <div className="block mt-1 flex space-x-2 items-center">
                     {discountPercent > 0 && (
                       <span className="px-1 py-1 rounded-lg font-medium bg-slate-150 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
-                        -{discountPercent}%
+                        {" "}
+                        -{discountPercent}%{" "}
                       </span>
                     )}
                     <span className="block text-base text-slate-400 dark:text-navy-300 line-through">
-                      ${product.originalPrice.toFixed(2)}
+                      {product.originalPrice.toFixed(2)}
                     </span>
                   </div>
                 )}
@@ -250,27 +254,35 @@ export default function ProductDetail() {
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="block">
                       <span className="block text-base text-slate-500 dark:text-navy-300">Size</span>
-                      <span className="block mt-2">
-                        <button
-                          className="btn h-8 px-3 py-1 text-xs border border-slate-300 text-slate-600 hover:bg-slate-150 focus:bg-slate-150 dark:border-navy-450 dark:text-navy-200 dark:hover:bg-navy-500 dark:focus:bg-navy-500"
-                          onClick={() => setSelectedSize(product.sizes[0])}
-                        >
-                          {selectedSize || product.sizes[0]}
-                        </button>
-                      </span>
+                      <div className="block mt-2 flex flex-wrap gap-2">
+                        {product.sizes.map((size) => (
+                          <button
+                            key={size}
+                            className={`btn h-8 px-3 py-1 text-xs border border-slate-300 text-slate-600 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-200 dark:hover:bg-navy-500 dark:focus:bg-navy-500 ${selectedSize === size ? "bg-slate-150 dark:bg-navy-500" : ""
+                              }`}
+                            onClick={() => setSelectedSize(selectedSize === size ? "" : size)}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {product.colors && product.colors.length > 0 && (
                     <div className="block">
                       <span className="block text-base text-slate-500 dark:text-navy-300">Color</span>
-                      <span className="block mt-2">
-                        <button
-                          className="btn h-8 px-3 py-1 text-xs border border-slate-300 text-slate-600 hover:bg-slate-150 focus:bg-slate-150 dark:border-navy-450 dark:text-navy-200 dark:hover:bg-navy-500 dark:focus:bg-navy-500"
-                          onClick={() => setSelectedColor(product.colors[0])}
-                        >
-                          {selectedColor || product.colors[0]}
-                        </button>
-                      </span>
+                      <div className="block mt-2 flex flex-wrap gap-2">
+                        {product.colors.map((color) => (
+                          <button
+                            key={color}
+                            className={`btn h-8 px-3 py-1 text-xs border border-slate-300 text-slate-600 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-200 dark:hover:bg-navy-500 dark:focus:bg-navy-500 ${selectedColor === color ? "bg-slate-150 dark:bg-navy-500" : ""
+                              }`}
+                            onClick={() => setSelectedColor(selectedColor === color ? "" : color)}
+                          >
+                            {color}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

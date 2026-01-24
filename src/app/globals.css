@@ -53,6 +53,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -68,16 +69,20 @@
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .btn:focus {
     outline: 2px solid transparent;
     outline-offset: 2px;
   }
+
   .text-success {
     @apply text-green-600;
   }
+
   .text-error {
     @apply text-red-600;
   }
+
   .circular-progress-container {
     align-items: center;
     display: flex;
@@ -87,12 +92,14 @@
     transition: all 0.3s ease;
     width: 50px;
   }
+
   .circular-progress {
     left: 0;
     position: absolute;
     top: 0;
     transform: rotate(-90deg);
   }
+
   .circular-button {
     align-items: center;
     background-color: #fff;
@@ -109,6 +116,7 @@
     width: 36px;
     z-index: 2;
   }
+
   .circular-button:hover {
     background-color: #f8fafc;
   }
@@ -119,6 +127,7 @@
       opacity: 0;
       transform: scale(0.95);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
@@ -130,6 +139,7 @@
       opacity: 1;
       transform: scale(1);
     }
+
     to {
       opacity: 0;
       transform: scale(0.95);
@@ -140,6 +150,7 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
@@ -149,6 +160,7 @@
     from {
       opacity: 1;
     }
+
     to {
       opacity: 0;
     }
@@ -168,5 +180,13 @@
 
   .animate-backdrop-out {
     animation: backdrop-fade-out 0.2s ease-in forwards;
+  }
+
+  .bg-slate-150 {
+    background-color: #e9eef5;
+  }
+
+  .focus\:bg-slate-150:focus {
+    background-color: #e9eef5;
   }
 }
