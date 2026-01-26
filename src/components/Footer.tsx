@@ -43,15 +43,17 @@ export default function Footer() {
             <Link href="/" className="router-link-active router-link-exact-active flex items-center space-x-2">
               <div className="avatar h-8 w-8">
                 {siteLogo ? (
-                  <Image
+                  <img
                     src={siteLogo}
                     alt={siteName}
                     width={32}
                     height={32}
                     className="mask object-cover"
                     onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.setAttribute("data-error", "1")
+                      const img = e.currentTarget
+                      if (img.dataset.error) return
+                      img.dataset.error = "1"
+                      img.src = "/placeholder.svg"
                     }}
                   />
                 ) : (
