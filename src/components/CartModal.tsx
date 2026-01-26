@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import Image from "next/image"
+import { useState } from "react"
 import Modal from "./Modal"
 import { useSiteData } from "@/contexts/SiteDataContext"
 import { siteServiceApi } from "@/services/api/siteServiceApi"
@@ -132,12 +131,12 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={checkoutTitle}>
-            <div className="block cart-info py-5">
+            <div className="block cart-info py-3 sm:py-5">
                 <div className="block block-cart">
-                    <span className="block font-semibold text-xl">{yourCartTitle}</span>
+                    <span className="block font-semibold text-lg sm:text-xl">{yourCartTitle}</span>
                     {cartProducts.length === 0 ? (
-                        <div className="block flex mx-auto justify-center p-5">
-                            <div className="block text-base flex space-x-2 text-slate-500 dark:text-navy-300">
+                        <div className="block flex mx-auto justify-center p-4 sm:p-5">
+                            <div className="block text-sm sm:text-base flex space-x-2 text-slate-500 dark:text-navy-300">
                                 <span>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
@@ -150,30 +149,30 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                         <div className="block block-items">
                             {cartProducts.map((item) => (
                                 <div key={`${item.product_id}-${item.variant_id}`} className="block mt-3">
-                                    <div className="block block-item grid grid-cols-2 items-center">
-                                        <div className="block block-item-image flex space-x-2 items-center">
-                                            <span className="block">
+                                    <div className="block block-item grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-0 items-start sm:items-center">
+                                        <div className="block block-item-image flex space-x-2 sm:space-x-3 items-center">
+                                            <span className="block flex-shrink-0">
                                                 <img
                                                     src={item.thumbnail || "/placeholder.svg?height=64&width=64"}
                                                     alt={item.name}
                                                     width={64}
                                                     height={64}
-                                                    className="w-12 h-12 lg:w-16 lg:h-16 object-center object-cover rounded-lg"
+                                                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-center object-cover rounded-lg"
                                                     loading="lazy"
                                                 />
                                             </span>
-                                            <span className="block">
-                                                <span className="block font-medium text-base line-clamp-1">{item.name}</span>
-                                                <span className="block text-slate-500 dark:text-navy-300 text-xs+">SKU: {item.sku}</span>
-                                                <span className="block text-base font-medium">${parseFloat(item.price).toFixed(2)}</span>
+                                            <span className="block min-w-0 flex-1">
+                                                <span className="block font-medium text-sm sm:text-base line-clamp-2">{item.name}</span>
+                                                <span className="block text-slate-500 dark:text-navy-300 text-xs sm:text-xs+ mt-0.5">SKU: {item.sku}</span>
+                                                <span className="block text-sm sm:text-base font-medium mt-1">${parseFloat(item.price).toFixed(2)}</span>
                                             </span>
                                         </div>
-                                        <div className="block flex justify-between items-center">
-                                            <div className="block block-item-quantity flex space-x-1 mt-2 items-center">
+                                        <div className="block flex justify-between sm:justify-end items-center gap-2 sm:gap-4">
+                                            <div className="block block-item-quantity flex space-x-1 items-center">
                                                 <button
                                                     disabled={item.quantity <= 1}
                                                     onClick={() => handleQuantityChange(item.product_id, item.variant_id, item.quantity - 1)}
-                                                    className={`btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 ${item.quantity <= 1 ? "opacity-50" : ""
+                                                    className={`btn h-8 sm:h-9 px-2 sm:px-3 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 touch-manipulation ${item.quantity <= 1 ? "opacity-50" : ""
                                                         }`}
                                                 >
                                                     <span>
@@ -189,11 +188,11 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                         const val = parseInt(e.target.value) || 1
                                                         handleQuantityChange(item.product_id, item.variant_id, Math.max(1, val))
                                                     }}
-                                                    className="form-input h-8 w-12 text-center rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 dark:border-navy-450 dark:hover:border-navy-400"
+                                                    className="form-input h-8 sm:h-9 w-12 sm:w-14 text-center rounded-lg border border-slate-300 bg-transparent px-2 sm:px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 dark:border-navy-450 dark:hover:border-navy-400 text-sm sm:text-base"
                                                 />
                                                 <button
                                                     onClick={() => handleQuantityChange(item.product_id, item.variant_id, item.quantity + 1)}
-                                                    className="btn h-8 px-2 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500"
+                                                    className="btn h-8 sm:h-9 px-2 sm:px-3 border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 touch-manipulation"
                                                 >
                                                     <span>
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -203,14 +202,14 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                 </button>
                                             </div>
                                             <div className="block block-item-price">
-                                                <div className="block flex space-x-4 items-center">
-                                                    <span className="font-semibold text-base">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                                                <div className="block flex space-x-2 sm:space-x-4 items-center">
+                                                    <span className="font-semibold text-sm sm:text-base">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
                                                     <button
                                                         onClick={() => handleRemoveProduct(item.product_id, item.variant_id)}
-                                                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 touch-manipulation p-1"
                                                         title="Remove item"
                                                     >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                                                         </svg>
                                                     </button>
@@ -226,22 +225,22 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                 </div>
                 {cartProducts.length > 0 && (
                     <>
-                        <div className="block mx-auto w-full mt-10">
+                        <div className="block mx-auto w-full mt-6 sm:mt-10">
                             <div className="h-px bg-slate-100 dark:bg-navy-500"></div>
                         </div>
-                        <div className="block block-info py-10">
+                        <div className="block block-info py-6 sm:py-10">
                             <form onSubmit={handleSubmit} method="POST">
-                                <div className="block grid grid-cols-12 gap-10">
+                                <div className="block grid grid-cols-12 gap-4 sm:gap-6 lg:gap-10">
                                     <div className="block col-span-12 lg:col-span-7">
-                                        <span className="block font-semibold text-xl">{orderInfoTitle}</span>
-                                        <div className="block-input mt-5">
+                                        <span className="block font-semibold text-lg sm:text-xl">{orderInfoTitle}</span>
+                                        <div className="block-input mt-4 sm:mt-5">
                                             <label className="block">
-                                                <span>
+                                                <span className="text-sm sm:text-base">
                                                     {orderNameLabel} <span className="text-error">*</span>
                                                 </span>
                                                 <span className="relative mt-1.5 flex">
                                                     <input
-                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
+                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2.5 sm:py-2 text-sm sm:text-base placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
                                                         type="text"
                                                         name="name"
                                                         required
@@ -250,13 +249,13 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     />
                                                 </span>
                                             </label>
-                                            <label className="block mt-4">
-                                                <span>
+                                            <label className="block mt-3 sm:mt-4">
+                                                <span className="text-sm sm:text-base">
                                                     {orderEmailLabel} <span className="text-error">*</span>
                                                 </span>
                                                 <span className="relative mt-1.5 flex">
                                                     <input
-                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
+                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2.5 sm:py-2 text-sm sm:text-base placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
                                                         type="email"
                                                         name="email"
                                                         required
@@ -265,11 +264,11 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     />
                                                 </span>
                                             </label>
-                                            <label className="block mt-4">
-                                                <span>{orderPhoneLabel}</span>
+                                            <label className="block mt-3 sm:mt-4">
+                                                <span className="text-sm sm:text-base">{orderPhoneLabel}</span>
                                                 <span className="relative mt-1.5 flex">
                                                     <input
-                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
+                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2.5 sm:py-2 text-sm sm:text-base placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
                                                         type="text"
                                                         name="phone"
                                                         value={formData.phone}
@@ -277,13 +276,13 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     />
                                                 </span>
                                             </label>
-                                            <label className="block mt-4">
-                                                <span>
+                                            <label className="block mt-3 sm:mt-4">
+                                                <span className="text-sm sm:text-base">
                                                     {orderAddressLabel} <span className="text-error">*</span>
                                                 </span>
                                                 <span className="relative mt-1.5 flex">
                                                     <input
-                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
+                                                        className="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2.5 sm:py-2 text-sm sm:text-base placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
                                                         type="text"
                                                         name="address"
                                                         required
@@ -292,13 +291,13 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     />
                                                 </span>
                                             </label>
-                                            <label className="block mt-4">
-                                                <span>{orderNoteLabel}</span>
+                                            <label className="block mt-3 sm:mt-4">
+                                                <span className="text-sm sm:text-base">{orderNoteLabel}</span>
                                                 <textarea
                                                     name="note"
                                                     rows={3}
                                                     placeholder=""
-                                                    className="form-textarea mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent p-2.5 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
+                                                    className="form-textarea mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent p-2.5 text-sm sm:text-base placeholder:text-slate-400/70 hover:border-slate-400 focus:border-slate-500 dark:border-navy-450 dark:hover:border-navy-400"
                                                     value={formData.notes}
                                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                                 ></textarea>
@@ -306,12 +305,12 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                         </div>
                                     </div>
                                     <div className="block col-span-12 lg:col-span-5">
-                                        <span className="block font-semibold text-xl">{orderSummaryTitle}</span>
-                                        <div className="block mt-5">
+                                        <span className="block font-semibold text-lg sm:text-xl">{orderSummaryTitle}</span>
+                                        <div className="block mt-4 sm:mt-5">
                                             <div className="block block-coupon">
-                                                <div className="relative flex -space-x-px keyword-index">
+                                                <div className="relative flex flex-col sm:flex-row -space-x-px keyword-index gap-2 sm:gap-0">
                                                     <input
-                                                        className="form-input peer uppercase w-full rounded-l-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 dark:border-navy-450 dark:hover:border-navy-400"
+                                                        className="form-input peer uppercase w-full rounded-lg sm:rounded-l-lg sm:rounded-r-none border border-slate-300 bg-transparent px-3 py-2.5 sm:py-2 text-sm sm:text-base placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 dark:border-navy-450 dark:hover:border-navy-400"
                                                         placeholder={discountCodeLabel}
                                                         name="coupon"
                                                         type="text"
@@ -321,46 +320,46 @@ export default function CartModal({ isOpen, onClose, onOrderComplete }: CartModa
                                                     <button
                                                         type="button"
                                                         onClick={handleApplyDiscount}
-                                                        className="btn rounded-l-none border-l-0 border border-slate-300 dark:border-navy-450 bg-slate-50 dark:bg-navy-600"
+                                                        className="btn rounded-lg sm:rounded-l-none sm:rounded-r-lg border-l sm:border-l-0 border border-slate-300 dark:border-navy-450 bg-slate-50 dark:bg-navy-600 py-2.5 sm:py-2 text-sm sm:text-base touch-manipulation"
                                                     >
                                                         <span>{applyLabel}</span>
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="block block-summary mt-5">
-                                                <div className="block p-4 bg-slate-50 dark:bg-navy-600 rounded-lg block-summary-order space-y-4">
-                                                    <div className="block flex justify-between">
+                                            <div className="block block-summary mt-4 sm:mt-5">
+                                                <div className="block p-3 sm:p-4 bg-slate-50 dark:bg-navy-600 rounded-lg block-summary-order space-y-3 sm:space-y-4">
+                                                    <div className="block flex justify-between text-sm sm:text-base">
                                                         <span>{subtotalLabel}</span>
                                                         <span className="font-medium">${subtotal.toFixed(2)}</span>
                                                     </div>
-                                                    <div className="block flex justify-between">
+                                                    <div className="block flex justify-between text-sm sm:text-base">
                                                         <span>{discountLabel}</span>
                                                         <span className="font-medium">-${discount.toFixed(2)}</span>
                                                     </div>
-                                                    <div className="block flex justify-between">
+                                                    <div className="block flex justify-between text-sm sm:text-base">
                                                         <span>{shippingLabel}</span>
                                                         <span className="font-medium">${shipping.toFixed(2)}</span>
                                                     </div>
-                                                    <div className="block mx-auto w-full mt-10">
+                                                    <div className="block mx-auto w-full mt-4 sm:mt-6">
                                                         <div className="h-px bg-slate-200 dark:bg-navy-500"></div>
                                                     </div>
                                                     <div className="block flex justify-between">
-                                                        <span className="text-base font-medium">{totalLabel}</span>
-                                                        <span className="text-lg font-bold">${total.toFixed(2)}</span>
+                                                        <span className="text-sm sm:text-base font-medium">{totalLabel}</span>
+                                                        <span className="text-base sm:text-lg font-bold">${total.toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                                 <div className="block block-action-checkout">
-                                                    <div className="block mt-5">
+                                                    <div className="block mt-4 sm:mt-5">
                                                         <button
                                                             type="submit"
                                                             disabled={isSubmitting || cartProducts.length === 0}
-                                                            className="btn w-full font-medium text-white space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="btn w-full font-medium text-white space-x-2 disabled:opacity-50 disabled:cursor-not-allowed py-2.5 sm:py-2 text-sm sm:text-base touch-manipulation"
                                                             style={{ backgroundColor: "#16a34a" }}
                                                         >
                                                             <span>{isSubmitting ? "Processing..." : orderSubmitLabel}</span>
                                                         </button>
                                                     </div>
-                                                    <div className="block mt-5 text-center hover:underline cursor-pointer text-slate-500 dark:text-navy-300" onClick={onClose}>
+                                                    <div className="block mt-4 sm:mt-5 text-center hover:underline cursor-pointer text-sm sm:text-base text-slate-500 dark:text-navy-300 touch-manipulation" onClick={onClose}>
                                                         <span>{continueShoppingLabel}</span>
                                                     </div>
                                                 </div>
