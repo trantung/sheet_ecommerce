@@ -24,12 +24,25 @@ function SiteWrapper({ children }: { children: React.ReactNode }) {
 
   const titlePage = getSiteInfo("title_page") || "Store"
   const subtitlePage = getSiteInfo("subtitle_page")
+  const siteFavicon = getSiteInfo("site_favicon")
 
   useEffect(() => {
     if (titlePage) {
       document.title = subtitlePage ? `${titlePage} | ${subtitlePage}` : titlePage
     }
   }, [titlePage, subtitlePage])
+
+  useEffect(() => {
+    if (siteFavicon) {
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement
+      if (!link) {
+        link = document.createElement("link")
+        link.rel = "icon"
+        document.getElementsByTagName("head")[0].appendChild(link)
+      }
+      link.href = siteFavicon
+    }
+  }, [siteFavicon])
 
   if (loading) {
     return (
