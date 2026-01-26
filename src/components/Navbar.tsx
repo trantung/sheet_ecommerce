@@ -56,15 +56,17 @@ export default function Navbar() {
                   <Link href="/" className="router-link-active router-link-exact-active flex items-center space-x-2">
                     <div className="avatar h-8 w-8">
                       {siteLogo ? (
-                        <Image
+                        <img
                           src={siteLogo}
                           alt={siteName}
                           width={32}
                           height={32}
                           className="mask object-cover"
                           onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.setAttribute("data-error", "1")
+                            const img = e.currentTarget
+                            if (img.dataset.error) return
+                            img.dataset.error = "1"
+                            img.src = "/placeholder.svg"
                           }}
                         />
                       ) : (
@@ -143,7 +145,7 @@ export default function Navbar() {
                     </Link>
                   )}
                 </div>
-                 <div className="block flex items-center lg:hidden space-x-2">
+                <div className="block flex items-center lg:hidden space-x-2">
                   {showDarkMode && (
                     <button className="btn h-8 w-8 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,15 +183,17 @@ export default function Navbar() {
                     <Link href="/" className="router-link-active router-link-exact-active flex items-center space-x-2">
                       <div className="avatar h-8 w-8">
                         {siteLogo ? (
-                          <Image
+                          <img
                             src={siteLogo}
                             alt={siteName}
                             width={32}
                             height={32}
                             className="mask rounded-full object-cover"
                             onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.setAttribute("data-error", "1")
+                              const img = e.currentTarget
+                              if (img.dataset.error) return
+                              img.dataset.error = "1"
+                              img.src = "/placeholder.svg"
                             }}
                           />
                         ) : (
